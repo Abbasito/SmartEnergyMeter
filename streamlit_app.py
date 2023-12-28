@@ -17,6 +17,12 @@ st.set_page_config(layout="wide")
 
 with open('style.css') as f:
     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+    
+
+# Sections 
+header = st.container()
+footer = st.container()
+
 
 # DATA EXTRACT
 Price_v, Times_v = get_data_from_api() # 10 1st values ; [67 65 63 63 60 67 68 111 150 100 ... 94] CONSIDERED AS [€/MWh / each hour] => f(t)
@@ -28,9 +34,11 @@ for j in range(len(Price_v)):
 
 # PYTHON CODE TO DEVELOP FOR PROJECT WITH LINK WITH ARDUINO ############################################################################
 # MACRO 
-BUDGET = 200 # [€/ month]          
-BUDGET_UNIT = round(BUDGET/(31*24),2) # [€/h]
-BUD_UNIT_V = [BUDGET_UNIT] * 24
+with footer :
+    budget = st.slider('What is your budget [€/month]', 150, 550, 250) #[€/ month]     
+
+budget_UNIT = round(budget/(31*24),2) # [€/h]
+budget_UNIT_V = [budget_UNIT] * 24
 
 
                                                                 # ON THE GRAPH : 
@@ -59,7 +67,7 @@ if len(Price_v) == len(Energy_inst):
 current_hour = 22
 money_saved = 0
 for k in range(current_hour): 
-    delta = BUDGET_UNIT - Consume_now[k]
+    delta = budget_UNIT - Consume_now[k]
     money_saved += delta
 
 money_saved = round(money_saved,2)
@@ -67,18 +75,24 @@ money_saved = round(money_saved,2)
 # END DEVELOP ###############################################################################################################################
 
 ### WEB APP DESIGN
-# Row A
-a1, a2, a3 = st.columns(3)
-a1.image(Image.open('streamlit-logo-secondary-colormark-darktext.png'))
-a2.metric("Monthly Budget", str(BUDGET) + " €/month ", "Fixed by the consumer")
-a3.metric("Hourly Budget", str(BUDGET_UNIT) + " €/hour ", "Fixed by the consumer")
 
-# Row B
-b1, b2, b3, b4 = st.columns((2, 2, 2, 2))
-b1.metric("PVPC Price instantaneous", str(Price_v[0]) + " €/kwh/hour", "From API")
-b2.metric("House instantaneous  energy consumption", str(Energy_inst[0]) + " kWh", "From Arduino by Current Sensor")
-b3.metric(" Current Price spending", str(Consume_now[0]) + "€/hour", " ")
-b4.metric("DATETIME", str(Times_v[2]), " ")
+
+with header:
+# Row A
+    a1, a2, a3 = st.columns(3)
+    a1.image(Image.open('streamlit-logo-secondary-colormark-darktext.png'))
+    a2.metric("Monthly Budget", str(budget) + " €/month ", "Fixed by the consumer")
+    a3.metric("Hourly Budget", str(budget_UNIT) + " €/hour ", "Fixed by the consumer")
+
+    # Row B
+    b1, b2, b3, b4 = st.columns((2, 2, 2, 2))
+    b1.metric("PVPC Price instantaneous", str(Price_v[0]) + " €/kwh/hour", "From API")
+    b2.metric("House instantaneous  energy consumption", str(Energy_inst[0]) + " kWh", "From Arduino by Current Sensor")
+    b3.metric(" Current Price spending", str(Consume_now[0]) + "€/hour", " ")
+    b4.metric("DATETIME", str(Times_v[2]), " ")
+
+
+
 
 # Row C
 c1, c2 = st.columns((4,2))
@@ -87,7 +101,7 @@ c1, c2 = st.columns((4,2))
 with c1: 
     fig, ax = plt.subplots(figsize=(12, 6))  # Définir la taille du graphique
     ax.plot(Times_v, Price_v, label='PVPC Price [€/kwh]', color='blue')  # Première fonction en bleu
-    ax.plot(Times_v, BUD_UNIT_V, label='Budget [€]', color='red')   # Deuxième fonction en rouge
+    ax.plot(Times_v, budget_UNIT_V, label='Budget [€]', color='red')   # Deuxième fonction en rouge
     ax.plot(Times_v, Consume_now, label='Current Price spending [€]', color='green') # Troisième fonction en vert
 
     # ADD
