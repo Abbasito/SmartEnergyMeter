@@ -53,3 +53,8 @@ div.vg-tooltip-element {
   display: none;
 }
 
+/* slider title  */
+.css-9gn890 p {
+  word-break: break-word;
+  font-size: 23px;
+}
